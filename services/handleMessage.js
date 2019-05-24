@@ -10,7 +10,7 @@ exports.handleMessage = (webhookEvent) => {
         if (message.quick_reply) {
           handleQuickReplies(webhookEvent);
         } else if (message.attachments) {
-          console.log("attatchement");
+          handleCoordinates(webhookEvent);
         } else if (message.text) {
           console.log("Recibiendo mensaje de texto");
           handleTextMessage("Enviaste Texto",webhookEvent);
@@ -58,7 +58,8 @@ exports.handleMessage = (webhookEvent) => {
             payload:'noRecomienda',
         }]};
       if(reply == 'rapidez' || reply == 'ubicacion' || reply == 'servicio'){
-        actions.survey(webhookEvent, response);
+        console.log(`Reply ${reply}`);
+        actions.quickReplies(webhookEvent, response);
       }else{
         handleTextMessage("Gracias por ayudarnos a mejorar", webhookEvent);
       }
@@ -68,14 +69,34 @@ handlePostback = (webhookEvent) => {
     let evento = webhookEvent.postback.payload; 
     switch(evento){
       case 'survey':
-        actions.survey(webhookEvent);
+        actions.quickReplies(webhookEvent);
       break;
       case 'find':
-          handleTextMessage("Seleccionaste ubicaciones", webhookEvent);
+          handleLocation(webhookEvent);
       break;
       case 'iniciar':
           sendAPI.getPorfile(webhookEvent.sender.id);
           handleTextMessage("Bienvenido al ChatBot de Platzi y Developer Circle", webhookEvent);
       break;
     }
+}
+
+handleCoordinates = (webhookEvent)=>{
+  let coordenadas = webhookEvent.message.attachments[0].payload.coordinates;
+  console.log(`Las coordenadas del usuario son: ${JSON.stringify(coordenadas)}`);
+  actions.stores(webhookEvent);
+}
+
+//Método para recibir ubicación
+handleLocation = (webhookEvent) => {
+  const repliesLocation = {
+    texto:'Por favor compartenos tu ubicación para encontrar sucursales cercanas a ti',
+    replies:[
+    {
+        content_type:"location",
+        title:'Enviar ubicación',
+        payload:'ubicacion',
+    }
+  ]};
+  actions.quickReplies(webhookEvent,repliesLocation); 
 }
