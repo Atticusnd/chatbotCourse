@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config();
+const handle = require("./services/handleMessage");
 
 //Configuraciones generales de la aplicación 
 
@@ -46,6 +47,7 @@ app.post("/webhook", (req, res) => {
       body.entry.forEach(function(entry) {
         // Obtenemos el contenido del mensaje enviado
         let webhookEvent = entry.messaging[0];
+        handle.handleMessage(webhookEvent);
         console.log(webhookEvent);
       });
     } else {
@@ -54,7 +56,7 @@ app.post("/webhook", (req, res) => {
     }
 });
   
-//Inicializamos servidro
+//Inicializamos servidor
 app.listen(app.get('port'), () => {
         console.log(`Servidor iniciado en  el puerto ${process.env.PORT}`);
 });
