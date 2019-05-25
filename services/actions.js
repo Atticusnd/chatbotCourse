@@ -53,7 +53,7 @@ exports.stores = (webhookEvent) =>{
                 {
                     title:"Tienda del centro",
                     image_url:"https://media4.s-nbcnews.com/i/newscms/2017_26/2053956/170627-better-grocery-store-main-se-539p_80a9ba9c8d466788799ca27568ee0d43.jpg",
-                    subtitle:"Opciones",
+                    subtitle:"Dirección corta de la tienda",
                     default_action: {
                         type: "web_url",
                         url: "https://goo.gl/maps/J5LQfLPy1s3zvtQZ6",
@@ -67,29 +67,9 @@ exports.stores = (webhookEvent) =>{
                           },{
                             "type":"phone_number",
                             "title":"Llama a la tienda",
-                            "payload":"+5215525131379"
+                            "payload":"+5215525250000"
                     } ]      
-                },
-                {
-                    title:"Tienda del centro",
-                    image_url:"https://media4.s-nbcnews.com/i/newscms/2017_26/2053956/170627-better-grocery-store-main-se-539p_80a9ba9c8d466788799ca27568ee0d43.jpg",
-                    subtitle:"Opciones",
-                    default_action: {
-                        type: "web_url",
-                        url: "https://goo.gl/maps/J5LQfLPy1s3zvtQZ6",
-                        messenger_extensions: "FALSE",
-                        webview_height_ratio: "COMPACT"
-                    },
-                    buttons:[{
-                            type:"web_url",
-                            url:"https://goo.gl/maps/J5LQfLPy1s3zvtQZ6",
-                            title:"Mostrar el mapa"
-                          },{
-                            "type":"phone_number",
-                            "title":"Llama a la tienda",
-                            "payload":"+5215525131379"
-                    } ]      
-                },
+                }
             ]
             }
         }
@@ -97,3 +77,14 @@ exports.stores = (webhookEvent) =>{
     }
     sendAPI.callSendAPI(response);
 }
+exports.sendTextMessage = (texto,webhookEvent)=>{
+    let response = {
+        recipient:{
+          id: webhookEvent.sender.id
+        },
+        message:{
+          text:texto
+      }   
+    };
+    sendAPI.callSendAPI(response);
+  }
