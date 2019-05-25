@@ -1,5 +1,8 @@
 const sendAPI = require("./graphAPI");
 const actions = require("./actions");
+const textoNLP = require('../mockupData/npl.json');
+
+
 
 //Método para manejar todas los distintos tipos de mensajes que recibimos
 exports.handleMessage = (webhookEvent) => {
@@ -10,10 +13,14 @@ exports.handleMessage = (webhookEvent) => {
         if (message.quick_reply) {
           handleQuickReplies(webhookEvent);
         } else if (message.attachments) {
-          handleCoordinates(webhookEvent);
+          let coordenadas = webhookEvent.message.attachments[0].payload.coordinates;
+          if(coordenadas){
+            console.log(`Las coordenadas del usuario son: ${JSON.stringify(coordenadas)}`);
+            actions.stores(webhookEvent);  
+          }      
         } else if (message.text) {
           console.log("Recibiendo mensaje de texto");
-          handleTextMessage("Enviaste Texto",webhookEvent);
+          handleNLP(webhookEvent);
         }
       } else if (webhookEvent.postback) {
         handlePostback(webhookEvent);
@@ -28,19 +35,7 @@ exports.handleMessage = (webhookEvent) => {
     }
     
   }
-//Método para el manejo de mensajes de texto
- handleTextMessage = (texto,webhookEvent)=>{
-    let response = {
-        messaging_type: "RESPONSE",
-        recipient:{
-          id: webhookEvent.sender.id
-        },
-        message:{
-          text:texto
-      }   
-    };
-    sendAPI.callSendAPI(response);
-  }
+
 //Método para el manejo de Quick Replies
   handleQuickReplies = (webhookEvent)=>{
       let reply = webhookEvent.message.quick_reply.payload;
@@ -61,7 +56,7 @@ exports.handleMessage = (webhookEvent) => {
         console.log(`Reply ${reply}`);
         actions.quickReplies(webhookEvent, response);
       }else{
-        handleTextMessage("Gracias por ayudarnos a mejorar", webhookEvent);
+        actions.sendTextMessage("Gracias por ayudarnos a mejorar", webhookEvent);
       }
   }
 //Método para la detección del envío de postbacks
@@ -76,15 +71,10 @@ handlePostback = (webhookEvent) => {
       break;
       case 'iniciar':
           sendAPI.getPorfile(webhookEvent.sender.id);
-          handleTextMessage("Bienvenido al ChatBot de Platzi y Developer Circle", webhookEvent);
+          actions.sendTextMessage("Hola soy el robot de Platzi y Developer Circle", webhookEvent);
+          actions.sendTextMessage("Te puedo ayudar con algunas dudas o encontrando sucursales cerca", webhookEvent);
       break;
     }
-}
-
-handleCoordinates = (webhookEvent)=>{
-  let coordenadas = webhookEvent.message.attachments[0].payload.coordinates;
-  console.log(`Las coordenadas del usuario son: ${JSON.stringify(coordenadas)}`);
-  actions.stores(webhookEvent);
 }
 
 //Método para recibir ubicación
@@ -99,4 +89,19 @@ handleLocation = (webhookEvent) => {
     }
   ]};
   actions.quickReplies(webhookEvent,repliesLocation); 
+}
+
+//Método para consumir servicios del procesador de lenguaje natural
+handleNLP =  (webhookEvent)=>{
+    let nlp = webhookEvent.message.nlp;
+    let texto = '';
+    const saludos = textoNLP.saludo;
+    if(nlp.entities.saludo){
+      texto = saludos[Math.floor(Math.random()*saludos.length)].texto;
+      actions.sendTextMessage(texto,webhookEvent);
+     }
+     if(nlp.entities.tiempoEntrega){
+       texto = textoNLP.tiempoEntrega[0].texto;
+       actions.sendTextMessage(texto,webhookEvent);
+     }
 }
